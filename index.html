@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دوز آنلاین | Online Tic-Tac-Toe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="game-container">
+    <div class="header">
+      <h1>🎮 دوز آنلاین</h1>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+
+    <!-- صفحه شروع -->
+    <div id="lobby" class="lobby">
+      <p class="lobby-desc">با دوستت آنلاین بازی کن!</p>
+      <button class="btn btn-primary" id="createRoomBtn">➕ ساخت اتاق جدید</button>
+
+      <div class="divider"><span>یا</span></div>
+
+      <input type="text" id="joinCode" class="input" placeholder="کد اتاق رو وارد کن..." maxlength="6">
+      <button class="btn btn-secondary" id="joinRoomBtn">🚪 ورود به اتاق</button>
+
+      <div id="waiting" class="waiting hidden">
+        <div class="loader"></div>
+        <p>در انتظار دوستت...</p>
+        <div class="room-info">
+          <span>کد اتاق:</span>
+          <strong id="roomCodeDisplay">------</strong>
+        </div>
+        <button class="btn btn-copy" id="copyLinkBtn">📋 کپی لینک دعوت</button>
+        <p class="hint" id="copyHint"></p>
+      </div>
+    </div>
+
+    <!-- صفحه بازی -->
+    <div id="gameArea" class="hidden">
+      <div class="scoreboard">
+        <div class="score-card x" id="scoreXCard">
+          <div class="label">تو (X)</div>
+          <div class="value" id="scoreX">0</div>
+        </div>
+        <div class="score-card draw" id="scoreDrawCard">
+          <div class="label">مساوی</div>
+          <div class="value" id="scoreDraw">0</div>
+        </div>
+        <div class="score-card o" id="scoreOCard">
+          <div class="label">دوستت (O)</div>
+          <div class="value" id="scoreO">0</div>
+        </div>
+      </div>
+
+      <div class="status" id="status">در حال اتصال...</div>
+      <div class="board" id="board"></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="newRoundBtn">🔄 دور جدید</button>
+        <button class="btn btn-secondary" id="leaveBtn">🚪 خروج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- پاپ‌آپ پایان دور -->
+  <div class="overlay" id="overlay">
+    <div class="popup">
+      <h2 id="popupTitle">برنده!</h2>
+      <p id="popupMessage"></p>
+      <button class="btn btn-primary" id="popupBtn">دور بعدی</button>
+    </div>
+  </div>
+
+  <!-- PeerJS از CDN -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,79 +1,673 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>دوز آنلاین | Online Tic-Tac-Toe</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0c29">
+<title>دوز آنلاین</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; color: #fff;
+  -webkit-user-select: none; user-select: none;
+}
+body.light { background: linear-gradient(135deg, #f5f7fa, #c3cfe2); color: #222; }
+
+.game-container {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  border-radius: 24px; padding: 24px 20px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  max-width: 440px; width: 100%;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+body.light .game-container { background: rgba(255,255,255,0.75); border-color: rgba(0,0,0,0.1); }
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+h1 {
+  font-size: 1.5rem;
+  background: linear-gradient(90deg, #f7971e, #ffd200);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; font-weight: 800;
+}
+.theme-toggle {
+  background: rgba(255,255,255,0.15); border: none; color: inherit;
+  font-size: 1.2rem; padding: 10px; border-radius: 50%;
+  cursor: pointer; width: 42px; height: 42px;
+}
+
+.btn {
+  width: 100%; padding: 16px; border: none; border-radius: 14px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; margin-bottom: 12px;
+  transition: transform 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a1a; }
+.btn-secondary { background: rgba(255,255,255,0.1); color: inherit; border: 1px solid rgba(255,255,255,0.25); }
+.btn-copy { background: linear-gradient(135deg, #4ecdc4, #44a08d); color: #fff; }
+.btn-danger { background: rgba(255,107,107,0.2); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.4); }
+
+.input {
+  width: 100%; padding: 16px; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08); color: inherit;
+  font-size: 1.4rem; text-align: center; letter-spacing: 6px;
+  font-weight: 800; margin-bottom: 12px; font-family: inherit;
+  -webkit-appearance: none;
+}
+.input::placeholder { font-size: 0.9rem; letter-spacing: normal; font-weight: 400; opacity: 0.6; }
+.input:focus { outline: none; border-color: #ffd200; background: rgba(255,255,255,0.12); }
+.input[readonly] { letter-spacing: 1px; font-size: 0.85rem; text-align: left; direction: ltr; padding: 14px; font-weight: 400; }
+
+.divider { position: relative; margin: 18px 0; opacity: 0.5; font-size: 0.85rem; text-align: center; }
+.divider::before, .divider::after {
+  content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: currentColor;
+}
+.divider::before { right: 0; } .divider::after { left: 0; }
+
+.waiting {
+  margin-top: 18px; padding: 18px;
+  background: rgba(255,255,255,0.05); border-radius: 16px;
+  border: 1px solid rgba(255,210,0,0.3);
+}
+.loader {
+  width: 36px; height: 36px; border: 3px solid rgba(255,210,0,0.2);
+  border-top-color: #ffd200; border-radius: 50%;
+  margin: 0 auto 12px; animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.code-display {
+  font-size: 2.2rem; letter-spacing: 8px; color: #ffd200;
+  font-family: monospace; font-weight: 800;
+  margin: 12px 0; padding: 12px;
+  background: rgba(255,210,0,0.1); border-radius: 12px;
+  border: 2px dashed rgba(255,210,0,0.4);
+}
+.hint { font-size: 0.82rem; color: #4ecdc4; margin-top: 8px; min-height: 18px; text-align: center; }
+.hint.error { color: #ff6b6b; }
+
+.scoreboard { display: flex; gap: 8px; margin-bottom: 18px; }
+.score-card {
+  flex: 1; background: rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 10px 4px;
+  border: 2px solid transparent; transition: 0.3s;
+}
+.score-card.active { border-color: #ffd200; box-shadow: 0 0 12px rgba(255,210,0,0.4); }
+.score-card .label { font-size: 0.72rem; opacity: 0.85; margin-bottom: 3px; }
+.score-card .value { font-size: 1.4rem; font-weight: 700; }
+.score-card.x .value { color: #ff6b6b; }
+.score-card.o .value { color: #4ecdc4; }
+.score-card.draw .value { color: #a0a0a0; }
+
+.status { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; min-height: 28px; text-align: center; }
+
+.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.cell {
+  aspect-ratio: 1; background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 16px; font-size: 2.6rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: 0.2s;
+}
+body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.1); }
+.cell:active:not(.taken) { transform: scale(0.95); }
+.cell.x { color: #ff6b6b; text-shadow: 0 0 16px rgba(255,107,107,0.5); }
+.cell.o { color: #4ecdc4; text-shadow: 0 0 16px rgba(78,205,196,0.5); }
+.cell.win { animation: winPulse 0.6s ease 3; border-color: #ffd200; box-shadow: 0 0 20px rgba(255,210,0,0.6); }
+@keyframes winPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+.cell.pop { animation: popIn 0.3s ease; }
+@keyframes popIn { 0%{transform:scale(0);} 70%{transform:scale(1.15);} 100%{transform:scale(1);} }
+
+.actions { display: flex; gap: 10px; }
+.actions .btn { margin-bottom: 0; padding: 14px 8px; font-size: 0.9rem; }
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: 0.3s; z-index: 100;
+  padding: 20px;
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+.popup {
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  padding: 30px 24px; border-radius: 22px; text-align: center;
+  transform: scale(0.85); transition: 0.3s;
+  border: 2px solid rgba(255,210,0,0.3);
+  max-width: 320px; width: 100%;
+}
+.overlay.show .popup { transform: scale(1); }
+.popup h2 {
+  font-size: 1.6rem; margin-bottom: 10px;
+  background: linear-gradient(90deg, #f7971e, #ffd200);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.popup p { opacity: 0.85; margin-bottom: 18px; font-size: 0.95rem; }
+
+.hidden { display: none !important; }
+.center { text-align: center; }
+.mb { margin-bottom: 12px; }
+
+@media (max-width: 380px) {
+  .game-container { padding: 18px 14px; border-radius: 20px; }
+  h1 { font-size: 1.3rem; }
+  .cell { font-size: 2.2rem; border-radius: 12px; }
+  .code-display { font-size: 1.8rem; letter-spacing: 5px; }
+}
+</style>
 </head>
 <body>
 
-  <div class="game-container">
-    <div class="header">
-      <h1>🎮 دوز آنلاین</h1>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
-    </div>
-
-    <!-- صفحه شروع -->
-    <div id="lobby" class="lobby">
-      <p class="lobby-desc">با دوستت آنلاین بازی کن!</p>
-      <button class="btn btn-primary" id="createRoomBtn">➕ ساخت اتاق جدید</button>
-
-      <div class="divider"><span>یا</span></div>
-
-      <input type="text" id="joinCode" class="input" placeholder="کد اتاق رو وارد کن..." maxlength="6">
-      <button class="btn btn-secondary" id="joinRoomBtn">🚪 ورود به اتاق</button>
-
-      <div id="waiting" class="waiting hidden">
-        <div class="loader"></div>
-        <p>در انتظار دوستت...</p>
-        <div class="room-info">
-          <span>کد اتاق:</span>
-          <strong id="roomCodeDisplay">------</strong>
-        </div>
-        <button class="btn btn-copy" id="copyLinkBtn">📋 کپی لینک دعوت</button>
-        <p class="hint" id="copyHint"></p>
-      </div>
-    </div>
-
-    <!-- صفحه بازی -->
-    <div id="gameArea" class="hidden">
-      <div class="scoreboard">
-        <div class="score-card x" id="scoreXCard">
-          <div class="label">تو (X)</div>
-          <div class="value" id="scoreX">0</div>
-        </div>
-        <div class="score-card draw" id="scoreDrawCard">
-          <div class="label">مساوی</div>
-          <div class="value" id="scoreDraw">0</div>
-        </div>
-        <div class="score-card o" id="scoreOCard">
-          <div class="label">دوستت (O)</div>
-          <div class="value" id="scoreO">0</div>
-        </div>
-      </div>
-
-      <div class="status" id="status">در حال اتصال...</div>
-      <div class="board" id="board"></div>
-
-      <div class="actions">
-        <button class="btn btn-primary" id="newRoundBtn">🔄 دور جدید</button>
-        <button class="btn btn-secondary" id="leaveBtn">🚪 خروج</button>
-      </div>
-    </div>
+<div class="game-container">
+  <div class="header">
+    <h1>🎮 دوز آنلاین</h1>
+    <button class="theme-toggle" id="themeToggle" type="button">🌙</button>
   </div>
 
-  <!-- پاپ‌آپ پایان دور -->
-  <div class="overlay" id="overlay">
-    <div class="popup">
-      <h2 id="popupTitle">برنده!</h2>
-      <p id="popupMessage"></p>
-      <button class="btn btn-primary" id="popupBtn">دور بعدی</button>
+  <!-- لابی -->
+  <div id="lobby">
+    <button class="btn btn-primary" id="createRoomBtn" type="button">➕ ساخت اتاق جدید</button>
+    <div class="divider"><span>یا</span></div>
+    <input type="tel" id="joinCode" class="input" placeholder="کد ۶ رقمی اتاق" maxlength="6" inputmode="numeric" autocomplete="off">
+    <button class="btn btn-secondary" id="joinRoomBtn" type="button">🚪 ورود به اتاق</button>
+
+    <div id="waiting" class="waiting hidden">
+      <div class="loader"></div>
+      <p class="center mb">در انتظار دوستت...</p>
+      <div class="code-display" id="roomCodeDisplay">------</div>
+      <p class="center" style="font-size:0.8rem;opacity:0.7;margin-bottom:10px;">این کد رو به دوستت بده یا لینک زیر رو بفرست:</p>
+      <input type="text" id="inviteLink" class="input" readonly>
+      <button class="btn btn-copy" id="shareLinkBtn" type="button">📤 اشتراک‌گذاری لینک</button>
+      <button class="btn btn-secondary" id="copyLinkBtn" type="button">📋 کپی لینک</button>
+      <button class="btn btn-danger" id="cancelWaitBtn" type="button">✖ انصراف</button>
+      <p class="hint" id="copyHint"></p>
     </div>
+
+    <p class="hint" id="lobbyHint"></p>
   </div>
 
-  <!-- PeerJS از CDN -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="script.js"></script>
+  <!-- بازی -->
+  <div id="gameArea" class="hidden">
+    <div class="scoreboard">
+      <div class="score-card x" id="scoreXCard">
+        <div class="label" id="labelX">تو (X)</div>
+        <div class="value" id="scoreX">0</div>
+      </div>
+      <div class="score-card draw">
+        <div class="label">مساوی</div>
+        <div class="value" id="scoreDraw">0</div>
+      </div>
+      <div class="score-card o" id="scoreOCard">
+        <div class="label" id="labelO">دوستت (O)</div>
+        <div class="value" id="scoreO">0</div>
+      </div>
+    </div>
+
+    <div class="status" id="status">در حال اتصال...</div>
+    <div class="board" id="board"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="newRoundBtn" type="button">🔄 دور جدید</button>
+      <button class="btn btn-danger" id="leaveBtn" type="button">🚪 خروج</button>
+    </div>
+  </div>
+</div>
+
+<!-- پاپ‌آپ -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <h2 id="popupTitle">برنده!</h2>
+    <p id="popupMessage"></p>
+    <button class="btn btn-primary" id="popupBtn" type="button">دور بعدی</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  const WINNING_COMBOS = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  const ROOM_PREFIX = 'dooz9k7'; // فقط حروف و عدد، بدون کاراکتر خاص
+
+  let peer = null, conn = null;
+  let isHost = false, mySymbol = null;
+  let currentPlayer = 'X';
+  let board = Array(9).fill('');
+  let gameActive = false, connected = false;
+  let scores = { X: 0, O: 0, draw: 0 };
+  let roomCode = null;
+
+  const $ = id => document.getElementById(id);
+  const lobby = $('lobby'), waiting = $('waiting'), gameArea = $('gameArea');
+  const statusEl = $('status'), boardEl = $('board');
+  const overlay = $('overlay'), popupTitle = $('popupTitle');
+  const popupMessage = $('popupMessage');
+  const copyHint = $('copyHint'), lobbyHint = $('lobbyHint');
+  const roomCodeDisplay = $('roomCodeDisplay'), inviteLinkEl = $('inviteLink');
+
+  // =============== ابزار ===============
+  function genCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+  function showHint(el, msg, isError) {
+    el.textContent = msg;
+    el.classList.toggle('error', !!isError);
+  }
+  function getInviteLink() {
+    return location.origin + location.pathname + '?r=' + roomCode;
+  }
+
+  // =============== ساخت اتاق ===============
+  function createRoom() {
+    if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+
+    roomCode = genCode();
+    isHost = true;
+    mySymbol = 'X';
+
+    showHint(lobbyHint, 'در حال ساخت اتاق...');
+
+    peer = new Peer(ROOM_PREFIX + roomCode, {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    // timeout اگه سرور جواب نداد
+    const timeout = setTimeout(() => {
+      if (!peer || !peer.open) {
+        showHint(lobbyHint, '❌ اتصال به سرور کند است. اینترنت را چک کن و دوباره تلاش کن.', true);
+        destroyPeer();
+      }
+    }, 15000);
+
+    peer.on('open', () => {
+      clearTimeout(timeout);
+      showHint(lobbyHint, '');
+      window.history.replaceState(null, '', '?r=' + roomCode);
+      roomCodeDisplay.textContent = roomCode;
+      inviteLinkEl.value = getInviteLink();
+      $('createRoomBtn').disabled = true;
+      $('joinRoomBtn').disabled = true;
+      $('joinCode').disabled = true;
+      waiting.classList.remove('hidden');
+    });
+
+    peer.on('connection', (c) => {
+      if (conn && conn.open) { c.close(); return; }
+      conn = c;
+      setupConnection();
+    });
+
+    peer.on('error', (err) => {
+      clearTimeout(timeout);
+      console.error('Peer error:', err);
+      let msg = 'خطای اتصال. دوباره تلاش کن.';
+      if (err.type === 'unavailable-id') msg = 'این کد گرفته شده. دوباره بزن.';
+      else if (err.type === 'network') msg = 'اینترنت قطع است.';
+      else if (err.type === 'server-error') msg = 'سرور PeerJS پاسخ نداد. کمی بعد امتحان کن.';
+      showHint(lobbyHint, '❌ ' + msg, true);
+      destroyPeer();
+      resetToLobby();
+    });
+  }
+
+  // =============== ورود به اتاق ===============
+  function joinRoom(code) {
+    code = String(code || '').replace(/\D/g, '');
+    if (code.length !== 6) {
+      showHint(lobbyHint, '❌ کد باید ۶ رقم باشه', true);
+      return;
+    }
+    if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+
+    isHost = false;
+    mySymbol = 'O';
+    roomCode = code;
+    showHint(lobbyHint, 'در حال اتصال...');
+
+    peer = new Peer({
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    const timeout = setTimeout(() => {
+      if (!connected) {
+        showHint(lobbyHint, '❌ اتاق پیدا نشد. شاید میزبان آفلاین شده.', true);
+        destroyPeer();
+        resetToLobby();
+      }
+    }, 15000);
+
+    peer.on('open', () => {
+      showHint(lobbyHint, 'در حال پیدا کردن میزبان...');
+      conn = peer.connect(ROOM_PREFIX + code, { reliable: true });
+      setupConnection();
+    });
+
+    peer.on('error', (err) => {
+      clearTimeout(timeout);
+      console.error('Peer error:', err);
+      let msg = 'اتصال ناموفق. کد رو چک کن.';
+      if (err.type === 'peer-unavailable') msg = 'اتاقی با این کد پیدا نشد.';
+      else if (err.type === 'network') msg = 'اینترنت قطع است.';
+      showHint(lobbyHint, '❌ ' + msg, true);
+      destroyPeer();
+      resetToLobby();
+    });
+  }
+
+  // =============== اتصال ===============
+  function setupConnection() {
+    if (!conn) return;
+
+    conn.on('open', () => {
+      connected = true;
+      waiting.classList.add('hidden');
+      lobby.classList.add('hidden');
+      gameArea.classList.remove('hidden');
+      showHint(lobbyHint, '');
+      startNewRound();
+    });
+
+    conn.on('data', (data) => {
+      try { handleMessage(data); } catch(e) { console.error(e); }
+    });
+
+    conn.on('close', () => {
+      connected = false;
+      gameActive = false;
+      statusEl.textContent = '❌ دوستت خارج شد';
+      setTimeout(() => {
+        if (confirm('دوستت از بازی خارج شد. برگردیم به لابی؟')) resetToLobby();
+      }, 300);
+    });
+
+    conn.on('error', (err) => console.error('Conn error:', err));
+  }
+
+  // =============== پیام‌ها ===============
+  function handleMessage(data) {
+    if (!data || !data.type) return;
+    switch (data.type) {
+      case 'move':
+        applyMove(data.index, data.player);
+        break;
+      case 'new-round':
+        startNewRound();
+        break;
+    }
+  }
+
+  // =============== دور جدید ===============
+  function startNewRound() {
+    board = Array(9).fill('');
+    currentPlayer = 'X';
+    gameActive = true;
+    renderBoard();
+    updateStatus();
+    hidePopup();
+  }
+
+  function renderBoard() {
+    boardEl.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (board[i] ? ' taken ' + board[i].toLowerCase() : '');
+      cell.textContent = board[i] || '';
+      cell.dataset.index = i;
+      cell.addEventListener('click', () => handleCellClick(i));
+      boardEl.appendChild(cell);
+    }
+    updateActiveScoreCard();
+  }
+
+  // =============== کلیک روی خانه ===============
+  function handleCellClick(index) {
+    if (!gameActive || !connected) return;
+    if (board[index] !== '') return;
+    if (currentPlayer !== mySymbol) {
+      statusEl.textContent = '⏳ صبر کن، نوبت دوستته';
+      return;
+    }
+    if (conn && conn.open) conn.send({ type: 'move', index: index, player: mySymbol });
+    applyMove(index, mySymbol);
+  }
+
+  // =============== اعمال حرکت ===============
+  function applyMove(index, player) {
+    if (board[index] !== '' || !gameActive) return;
+    board[index] = player;
+
+    const cell = boardEl.children[index];
+    if (cell) {
+      cell.textContent = player;
+      cell.classList.add('taken', 'pop', player.toLowerCase());
+      setTimeout(() => cell.classList.remove('pop'), 300);
+    }
+
+    const winCombo = checkWinner();
+    if (winCombo) {
+      gameActive = false;
+      winCombo.forEach(i => boardEl.children[i] && boardEl.children[i].classList.add('win'));
+      scores[player]++;
+      updateScores();
+      const iWon = player === mySymbol;
+      setTimeout(() => {
+        showPopup(iWon ? '🎉 بردی!' : '😢 باختی!',
+                  iWon ? 'آفرین! حریفت رو بردی 😎' : 'دفعه بعد جبران کن!');
+      }, 400);
+      return;
+    }
+
+    if (board.every(c => c !== '')) {
+      gameActive = false;
+      scores.draw++;
+      updateScores();
+      setTimeout(() => showPopup('🤝 مساوی!', 'هیچ‌کدام نبردند!'), 400);
+      return;
+    }
+
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    updateStatus();
+    updateActiveScoreCard();
+  }
+
+  // =============== کمک‌ها ===============
+  function checkWinner() {
+    for (const [a,b,c] of WINNING_COMBOS) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) return [a,b,c];
+    }
+    return null;
+  }
+
+  function updateStatus() {
+    if (!connected) { statusEl.textContent = 'در حال اتصال...'; return; }
+    if (!gameActive) return;
+    if (currentPlayer === mySymbol) {
+      statusEl.textContent = '🟢 نوبت خودته';
+      statusEl.style.color = '#4ecdc4';
+    } else {
+      statusEl.textContent = '⏳ نوبت دوستته';
+      statusEl.style.color = '#ffd200';
+    }
+  }
+
+  function updateScores() {
+    $('scoreX').textContent = scores.X;
+    $('scoreO').textContent = scores.O;
+    $('scoreDraw').textContent = scores.draw;
+  }
+
+  function updateActiveScoreCard() {
+    const xIsMe = mySymbol === 'X';
+    $('labelX').textContent = xIsMe ? 'تو (X)' : 'دوستت (X)';
+    $('labelO').textContent = xIsMe ? 'دوستت (O)' : 'تو (O)';
+    $('scoreXCard').classList.toggle('active', currentPlayer === 'X');
+    $('scoreOCard').classList.toggle('active', currentPlayer === 'O');
+  }
+
+  function showPopup(t, m) {
+    popupTitle.textContent = t;
+    popupMessage.textContent = m;
+    overlay.classList.add('show');
+  }
+  function hidePopup() { overlay.classList.remove('show'); }
+
+  // =============== پاک‌سازی ===============
+  function destroyPeer() {
+    if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+    conn = null;
+    connected = false;
+  }
+
+  function resetToLobby() {
+    destroyPeer();
+    roomCode = null;
+    isHost = false;
+    mySymbol = null;
+    window.history.replaceState(null, '', location.pathname);
+    waiting.classList.add('hidden');
+    lobby.classList.remove('hidden');
+    gameArea.classList.add('hidden');
+    $('createRoomBtn').disabled = false;
+    $('joinRoomBtn').disabled = false;
+    $('joinCode').disabled = false;
+    $('joinCode').value = '';
+    inviteLinkEl.value = '';
+    roomCodeDisplay.textContent = '------';
+    showHint(lobbyHint, '');
+    showHint(copyHint, '');
+  }
+
+  // =============== اشتراک‌گذاری / کپی ===============
+  async function shareLink() {
+    const url = getInviteLink();
+    const text = 'بیا دوز بازی کنیم! کد اتاق: ' + roomCode;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'دوز آنلاین', text: text, url: url });
+        showHint(copyHint, '✅ ارسال شد');
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        // در غیر این صورت بیفت روی کپی
+      }
+    }
+    copyLink();
+  }
+
+  function copyLink() {
+    const url = getInviteLink();
+    // روش ۱: Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(() => {
+        showHint(copyHint, '✅ لینک کپی شد!');
+        setTimeout(() => showHint(copyHint, ''), 3000);
+      }).catch(() => fallbackCopy(url));
+    } else {
+      fallbackCopy(url);
+    }
+  }
+
+  function fallbackCopy(url) {
+    // روش ۲: انتخاب متن داخل input
+    inviteLinkEl.value = url;
+    inviteLinkEl.removeAttribute('readonly');
+    inviteLinkEl.select();
+    inviteLinkEl.setSelectionRange(0, 99999);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) {}
+    inviteLinkEl.setAttribute('readonly', 'readonly');
+    if (ok) {
+      showHint(copyHint, '✅ لینک کپی شد!');
+      setTimeout(() => showHint(copyHint, ''), 3000);
+    } else {
+      showHint(copyHint, '⚠️ لینک رو دستی نگه‌دار و کپی کن (روی کادر بالا نگه‌دار)', true);
+    }
+  }
+
+  // =============== رویدادها ===============
+  $('createRoomBtn').addEventListener('click', createRoom);
+
+  $('joinRoomBtn').addEventListener('click', () => {
+    joinRoom($('joinCode').value);
+  });
+
+  $('joinCode').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  });
+
+  $('joinCode').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') joinRoom($('joinCode').value);
+  });
+
+  $('shareLinkBtn').addEventListener('click', shareLink);
+  $('copyLinkBtn').addEventListener('click', copyLink);
+  $('cancelWaitBtn').addEventListener('click', () => {
+    if (confirm('لغو کنم؟')) resetToLobby();
+  });
+
+  $('newRoundBtn').addEventListener('click', () => {
+    if (!connected) return;
+    if (conn && conn.open) conn.send({ type: 'new-round' });
+    startNewRound();
+  });
+
+  $('popupBtn').addEventListener('click', () => {
+    if (!connected) { resetToLobby(); return; }
+    if (conn && conn.open) conn.send({ type: 'new-round' });
+    startNewRound();
+  });
+
+  $('leaveBtn').addEventListener('click', () => {
+    if (confirm('مطمئنی؟')) resetToLobby();
+  });
+
+  $('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    $('themeToggle').textContent = isLight ? '☀️' : '🌙';
+    try { localStorage.setItem('dooz-theme', isLight ? 'light' : 'dark'); } catch(e){}
+  });
+
+  // =============== راه‌اندازی ===============
+  try {
+    if (localStorage.getItem('dooz-theme') === 'light') {
+      document.body.classList.add('light');
+      $('themeToggle').textContent = '☀️';
+    }
+  } catch(e) {}
+
+  const params = new URLSearchParams(location.search);
+  const r = (params.get('r') || params.get('room') || '').replace(/\D/g, '').slice(0, 6);
+  if (r.length === 6) {
+    $('joinCode').value = r;
+    setTimeout(() => joinRoom(r), 400);
+  }
+})();
+</script>
 </body>
 </html>

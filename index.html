@@ -2,221 +2,558 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f0c29">
-<title>دوز آنلاین</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0616">
+<title>⚡ دوز نئون | Neon Tic-Tac-Toe</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
+
+html, body {
+  height: 100%;
+  overflow: hidden;
   font-family: -apple-system, 'Segoe UI', Tahoma, sans-serif;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background: #0a0616;
+  color: #fff;
+  -webkit-user-select: none; user-select: none;
+  touch-action: manipulation;
+}
+
+/* ============ پس‌زمینه ذرات ============ */
+#particles {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* گرادیان‌های نئون پس‌زمینه */
+body::before, body::after {
+  content: ''; position: fixed; border-radius: 50%;
+  filter: blur(80px); opacity: 0.35; z-index: 0; pointer-events: none;
+  animation: floatBlob 20s ease-in-out infinite;
+}
+body::before {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #ff006e, transparent 70%);
+  top: -100px; right: -100px;
+}
+body::after {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #00f5ff, transparent 70%);
+  bottom: -100px; left: -100px;
+  animation-delay: -10s;
+}
+@keyframes floatBlob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.9); }
+}
+
+/* ============ کانتینر اصلی ============ */
+.wrap {
+  position: relative;
+  z-index: 1;
   min-height: 100vh; min-height: 100dvh;
   display: flex; align-items: center; justify-content: center;
-  padding: 16px; color: #fff;
-  -webkit-user-select: none; user-select: none;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
-body.light { background: linear-gradient(135deg, #f5f7fa, #c3cfe2); color: #222; }
 
 .game-container {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  border-radius: 24px; padding: 24px 20px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  background: rgba(20, 15, 40, 0.75);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 22px 18px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 80px rgba(138, 43, 226, 0.15);
   max-width: 440px; width: 100%;
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: fadeUp 0.5s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ هدر ============ */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+h1 {
+  font-size: 1.4rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #ff006e, #8338ec, #00f5ff, #ff006e);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideGradient 4s linear infinite;
+  letter-spacing: -0.5px;
+}
+@keyframes slideGradient {
+  to { background-position: -300% 0; }
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: inherit; font-size: 1.1rem;
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
+
+/* ============ دکمه‌ها ============ */
+.btn {
+  width: 100%;
+  padding: 15px 16px;
+  border: none; border-radius: 14px;
+  font-size: 0.98rem; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  margin-bottom: 10px;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  -webkit-appearance: none;
+  position: relative; overflow: hidden;
+  color: #fff;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff006e, #8338ec);
+  box-shadow: 0 8px 25px rgba(255, 0, 110, 0.35);
+}
+.btn-primary:active:not(:disabled) { box-shadow: 0 4px 15px rgba(255, 0, 110, 0.5); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
 }
-body.light .game-container { background: rgba(255,255,255,0.75); border-color: rgba(0,0,0,0.1); }
+.btn-secondary:active:not(:disabled) { background: rgba(255,255,255,0.15); }
 
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-h1 {
-  font-size: 1.5rem;
-  background: linear-gradient(90deg, #f7971e, #ffd200);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; font-weight: 800;
-}
-.theme-toggle {
-  background: rgba(255,255,255,0.15); border: none; color: inherit;
-  font-size: 1.2rem; padding: 10px; border-radius: 50%;
-  cursor: pointer; width: 42px; height: 42px;
+.btn-cyan {
+  background: linear-gradient(135deg, #00f5ff, #0080ff);
+  color: #001a1a;
+  box-shadow: 0 8px 25px rgba(0, 245, 255, 0.3);
 }
 
-.btn {
-  width: 100%; padding: 16px; border: none; border-radius: 14px;
-  font-size: 1rem; font-weight: 700; cursor: pointer;
-  font-family: inherit; margin-bottom: 12px;
-  transition: transform 0.15s;
-  -webkit-appearance: none; appearance: none;
+.btn-danger {
+  background: rgba(255, 60, 90, 0.15);
+  color: #ff5c78;
+  border: 1px solid rgba(255, 60, 90, 0.35);
 }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary { background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a1a; }
-.btn-secondary { background: rgba(255,255,255,0.1); color: inherit; border: 1px solid rgba(255,255,255,0.25); }
-.btn-copy { background: linear-gradient(135deg, #4ecdc4, #44a08d); color: #fff; }
-.btn-danger { background: rgba(255,107,107,0.2); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.4); }
 
+/* ============ اینپوت ============ */
 .input {
-  width: 100%; padding: 16px; border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.08); color: inherit;
-  font-size: 1.4rem; text-align: center; letter-spacing: 6px;
-  font-weight: 800; margin-bottom: 12px; font-family: inherit;
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 1.6rem;
+  text-align: center;
+  letter-spacing: 8px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  font-family: 'Courier New', monospace;
   -webkit-appearance: none;
+  transition: 0.2s;
 }
-.input::placeholder { font-size: 0.9rem; letter-spacing: normal; font-weight: 400; opacity: 0.6; }
-.input:focus { outline: none; border-color: #ffd200; background: rgba(255,255,255,0.12); }
-.input[readonly] { letter-spacing: 1px; font-size: 0.85rem; text-align: left; direction: ltr; padding: 14px; font-weight: 400; }
+.input::placeholder { font-size: 0.85rem; letter-spacing: normal; font-weight: 400; opacity: 0.5; font-family: inherit; }
+.input:focus { outline: none; border-color: #00f5ff; box-shadow: 0 0 20px rgba(0, 245, 255, 0.3); }
+.input[readonly] { letter-spacing: 1px; font-size: 0.75rem; text-align: left; direction: ltr; padding: 12px; font-weight: 400; font-family: monospace; }
 
-.divider { position: relative; margin: 18px 0; opacity: 0.5; font-size: 0.85rem; text-align: center; }
+/* ============ لابی ============ */
+.divider {
+  position: relative; margin: 16px 0;
+  opacity: 0.5; font-size: 0.8rem; text-align: center;
+}
 .divider::before, .divider::after {
-  content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: currentColor;
+  content: ''; position: absolute; top: 50%; width: 42%; height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
 }
 .divider::before { right: 0; } .divider::after { left: 0; }
 
 .waiting {
-  margin-top: 18px; padding: 18px;
-  background: rgba(255,255,255,0.05); border-radius: 16px;
-  border: 1px solid rgba(255,210,0,0.3);
+  margin-top: 16px; padding: 18px;
+  background: rgba(0, 245, 255, 0.04);
+  border-radius: 18px;
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  animation: fadeUp 0.4s ease;
+  position: relative; overflow: hidden;
 }
+.waiting::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.08), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
 .loader {
-  width: 36px; height: 36px; border: 3px solid rgba(255,210,0,0.2);
-  border-top-color: #ffd200; border-radius: 50%;
-  margin: 0 auto 12px; animation: spin 1s linear infinite;
+  width: 40px; height: 40px;
+  margin: 0 auto 12px;
+  position: relative;
+}
+.loader::before, .loader::after {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 50%; border: 3px solid transparent;
+}
+.loader::before {
+  border-top-color: #00f5ff;
+  border-right-color: #ff006e;
+  animation: spin 1s linear infinite;
+}
+.loader::after {
+  inset: 6px;
+  border-bottom-color: #8338ec;
+  animation: spin 1.5s linear infinite reverse;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .code-display {
-  font-size: 2.2rem; letter-spacing: 8px; color: #ffd200;
-  font-family: monospace; font-weight: 800;
-  margin: 12px 0; padding: 12px;
-  background: rgba(255,210,0,0.1); border-radius: 12px;
-  border: 2px dashed rgba(255,210,0,0.4);
+  font-size: 2.4rem;
+  letter-spacing: 10px;
+  font-weight: 900;
+  font-family: 'Courier New', monospace;
+  margin: 10px 0;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.15), rgba(131, 56, 236, 0.15));
+  border: 2px dashed rgba(255, 0, 110, 0.4);
+  text-align: center;
+  direction: ltr;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 0, 110, 0.7);
+  animation: pulseCode 2s ease-in-out infinite;
 }
-.hint { font-size: 0.82rem; color: #4ecdc4; margin-top: 8px; min-height: 18px; text-align: center; }
-.hint.error { color: #ff6b6b; }
+@keyframes pulseCode {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 110, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 0, 110, 0); }
+}
 
-.scoreboard { display: flex; gap: 8px; margin-bottom: 18px; }
+.hint {
+  font-size: 0.8rem;
+  color: #00f5ff;
+  margin-top: 8px; min-height: 16px;
+  text-align: center;
+  transition: 0.2s;
+}
+.hint.error { color: #ff5c78; }
+.hint.success { color: #00ff9d; }
+
+/* استاتوس اتصال */
+.conn-status {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center;
+  padding: 10px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff5c78;
+  animation: blink 1s infinite;
+}
+.conn-dot.connecting { background: #ffd200; }
+.conn-dot.connected { background: #00ff9d; animation: none; box-shadow: 0 0 10px #00ff9d; }
+@keyframes blink { 50% { opacity: 0.3; } }
+
+/* ============ امتیازات ============ */
+.scoreboard {
+  display: flex; gap: 8px; margin-bottom: 14px;
+}
 .score-card {
-  flex: 1; background: rgba(255,255,255,0.08);
-  border-radius: 14px; padding: 10px 4px;
-  border: 2px solid transparent; transition: 0.3s;
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 10px 4px;
+  border: 2px solid transparent;
+  transition: 0.3s;
+  position: relative;
+  text-align: center;
 }
-.score-card.active { border-color: #ffd200; box-shadow: 0 0 12px rgba(255,210,0,0.4); }
-.score-card .label { font-size: 0.72rem; opacity: 0.85; margin-bottom: 3px; }
-.score-card .value { font-size: 1.4rem; font-weight: 700; }
-.score-card.x .value { color: #ff6b6b; }
-.score-card.o .value { color: #4ecdc4; }
-.score-card.draw .value { color: #a0a0a0; }
+.score-card.active {
+  border-color: #00f5ff;
+  background: rgba(0, 245, 255, 0.08);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+}
+.score-card .label { font-size: 0.7rem; opacity: 0.75; margin-bottom: 3px; font-weight: 600; }
+.score-card .value { font-size: 1.5rem; font-weight: 900; line-height: 1; }
+.score-card.x .value { color: #ff006e; text-shadow: 0 0 15px rgba(255,0,110,0.6); }
+.score-card.o .value { color: #00f5ff; text-shadow: 0 0 15px rgba(0,245,255,0.6); }
+.score-card.draw .value { color: #b0b0b0; }
 
-.status { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; min-height: 28px; text-align: center; }
+/* ============ تایمر ============ */
+.timer-wrap {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #00f5ff, #ff006e);
+  border-radius: 4px;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px currentColor;
+}
+.timer-bar.warning { background: linear-gradient(90deg, #ff006e, #ff5c78); }
 
-.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+/* ============ وضعیت ============ */
+.status {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  min-height: 26px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+/* ============ صفحه بازی ============ */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
 .cell {
-  aspect-ratio: 1; background: rgba(255,255,255,0.06);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 16px; font-size: 2.6rem; font-weight: 700;
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  font-size: 2.8rem;
+  font-weight: 900;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: 0.2s;
+  cursor: pointer;
+  transition: 0.2s;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  color: #fff;
 }
-body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.1); }
-.cell:active:not(.taken) { transform: scale(0.95); }
-.cell.x { color: #ff6b6b; text-shadow: 0 0 16px rgba(255,107,107,0.5); }
-.cell.o { color: #4ecdc4; text-shadow: 0 0 16px rgba(78,205,196,0.5); }
-.cell.win { animation: winPulse 0.6s ease 3; border-color: #ffd200; box-shadow: 0 0 20px rgba(255,210,0,0.6); }
-@keyframes winPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
-.cell.pop { animation: popIn 0.3s ease; }
-@keyframes popIn { 0%{transform:scale(0);} 70%{transform:scale(1.15);} 100%{transform:scale(1);} }
+.cell::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1), transparent 70%);
+  opacity: 0; transition: 0.2s;
+}
+.cell:active:not(.taken) { transform: scale(0.95); border-color: rgba(0, 245, 255, 0.6); }
+.cell:active:not(.taken)::before { opacity: 1; }
 
-.actions { display: flex; gap: 10px; }
-.actions .btn { margin-bottom: 0; padding: 14px 8px; font-size: 0.9rem; }
+.cell.taken { cursor: not-allowed; }
+.cell.x {
+  color: #ff006e;
+  text-shadow: 0 0 20px #ff006e, 0 0 40px rgba(255,0,110,0.5);
+  border-color: rgba(255, 0, 110, 0.3);
+}
+.cell.o {
+  color: #00f5ff;
+  text-shadow: 0 0 20px #00f5ff, 0 0 40px rgba(0,245,255,0.5);
+  border-color: rgba(0, 245, 255, 0.3);
+}
+.cell.win {
+  animation: winPulse 0.5s ease 4;
+  border-color: #ffd200;
+  box-shadow: 0 0 30px #ffd200, inset 0 0 20px rgba(255, 210, 0, 0.3);
+}
+@keyframes winPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.cell.pop { animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes popIn {
+  0% { transform: scale(0) rotate(-45deg); }
+  70% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); }
+}
 
+/* ============ اکشن‌ها ============ */
+.actions { display: flex; gap: 8px; }
+.actions .btn { margin-bottom: 0; padding: 13px 8px; font-size: 0.85rem; }
+
+/* ============ پاپ‌آپ ============ */
 .overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: 0.3s; z-index: 100;
-  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: 0.3s;
+  z-index: 100; padding: 20px;
 }
 .overlay.show { opacity: 1; pointer-events: auto; }
 .popup {
-  background: linear-gradient(135deg, #1e1b4b, #312e81);
-  padding: 30px 24px; border-radius: 22px; text-align: center;
-  transform: scale(0.85); transition: 0.3s;
-  border: 2px solid rgba(255,210,0,0.3);
-  max-width: 320px; width: 100%;
+  background: linear-gradient(135deg, #1a1030, #2a1548);
+  padding: 30px 24px;
+  border-radius: 24px;
+  text-align: center;
+  transform: scale(0.85) translateY(20px);
+  transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 210, 0, 0.3);
+  max-width: 340px; width: 100%;
+  box-shadow: 0 0 60px rgba(255, 210, 0, 0.2);
+  position: relative; overflow: hidden;
 }
-.overlay.show .popup { transform: scale(1); }
+.overlay.show .popup { transform: scale(1) translateY(0); }
+.popup::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(255, 210, 0, 0.1), transparent 30%);
+  animation: rotate 4s linear infinite;
+}
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+.popup-content { position: relative; z-index: 1; }
 .popup h2 {
-  font-size: 1.6rem; margin-bottom: 10px;
-  background: linear-gradient(90deg, #f7971e, #ffd200);
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  font-weight: 900;
+}
+.popup h2.win {
+  background: linear-gradient(90deg, #ffd200, #ff006e);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.popup h2.lose { color: #ff5c78; }
+.popup h2.draw {
+  background: linear-gradient(90deg, #b0b0b0, #00f5ff);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .popup p { opacity: 0.85; margin-bottom: 18px; font-size: 0.95rem; }
+.popup .big-emoji { font-size: 4rem; margin-bottom: 8px; animation: bounce 0.8s infinite; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
 
 .hidden { display: none !important; }
 .center { text-align: center; }
-.mb { margin-bottom: 12px; }
+.mb { margin-bottom: 10px; }
+
+/* ============ سری (بهترین از) ============ */
+.series-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, rgba(255, 210, 0, 0.2), rgba(255, 0, 110, 0.2));
+  border: 1px solid rgba(255, 210, 0, 0.4);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #ffd200;
+}
+
+/* ============ کانفتی ============ */
+#confetti {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 99;
+}
 
 @media (max-width: 380px) {
-  .game-container { padding: 18px 14px; border-radius: 20px; }
-  h1 { font-size: 1.3rem; }
+  .game-container { padding: 18px 12px; border-radius: 22px; }
+  h1 { font-size: 1.2rem; }
   .cell { font-size: 2.2rem; border-radius: 12px; }
-  .code-display { font-size: 1.8rem; letter-spacing: 5px; }
+  .code-display { font-size: 1.9rem; letter-spacing: 6px; }
+  .popup .big-emoji { font-size: 3rem; }
 }
+
+/* ============ لرزش ============ */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.shake { animation: shake 0.3s ease; }
 </style>
 </head>
 <body>
 
-<div class="game-container">
-  <div class="header">
-    <h1>🎮 دوز آنلاین</h1>
-    <button class="theme-toggle" id="themeToggle" type="button">🌙</button>
-  </div>
+<canvas id="particles"></canvas>
+<canvas id="confetti"></canvas>
 
-  <!-- لابی -->
-  <div id="lobby">
-    <button class="btn btn-primary" id="createRoomBtn" type="button">➕ ساخت اتاق جدید</button>
-    <div class="divider"><span>یا</span></div>
-    <input type="tel" id="joinCode" class="input" placeholder="کد ۶ رقمی اتاق" maxlength="6" inputmode="numeric" autocomplete="off">
-    <button class="btn btn-secondary" id="joinRoomBtn" type="button">🚪 ورود به اتاق</button>
-
-    <div id="waiting" class="waiting hidden">
-      <div class="loader"></div>
-      <p class="center mb">در انتظار دوستت...</p>
-      <div class="code-display" id="roomCodeDisplay">------</div>
-      <p class="center" style="font-size:0.8rem;opacity:0.7;margin-bottom:10px;">این کد رو به دوستت بده یا لینک زیر رو بفرست:</p>
-      <input type="text" id="inviteLink" class="input" readonly>
-      <button class="btn btn-copy" id="shareLinkBtn" type="button">📤 اشتراک‌گذاری لینک</button>
-      <button class="btn btn-secondary" id="copyLinkBtn" type="button">📋 کپی لینک</button>
-      <button class="btn btn-danger" id="cancelWaitBtn" type="button">✖ انصراف</button>
-      <p class="hint" id="copyHint"></p>
+<div class="wrap">
+  <div class="game-container">
+    <div class="header">
+      <h1>⚡ دوز نئون</h1>
+      <button class="icon-btn" id="themeToggle" type="button" title="تم">🎨</button>
     </div>
 
-    <p class="hint" id="lobbyHint"></p>
-  </div>
-
-  <!-- بازی -->
-  <div id="gameArea" class="hidden">
-    <div class="scoreboard">
-      <div class="score-card x" id="scoreXCard">
-        <div class="label" id="labelX">تو (X)</div>
-        <div class="value" id="scoreX">0</div>
-      </div>
-      <div class="score-card draw">
-        <div class="label">مساوی</div>
-        <div class="value" id="scoreDraw">0</div>
-      </div>
-      <div class="score-card o" id="scoreOCard">
-        <div class="label" id="labelO">دوستت (O)</div>
-        <div class="value" id="scoreO">0</div>
-      </div>
+    <!-- وضعیت اتصال -->
+    <div class="conn-status" id="connStatus">
+      <span class="conn-dot" id="connDot"></span>
+      <span id="connText">آفلاین</span>
     </div>
 
-    <div class="status" id="status">در حال اتصال...</div>
-    <div class="board" id="board"></div>
+    <!-- لابی -->
+    <div id="lobby">
+      <button class="btn btn-primary" id="createRoomBtn" type="button">➕ ساخت اتاق</button>
+      <div class="divider"><span>یا</span></div>
+      <input type="tel" id="joinCode" class="input" placeholder="کد ۶ رقمی" maxlength="6" inputmode="numeric" autocomplete="off">
+      <button class="btn btn-secondary" id="joinRoomBtn" type="button">🚪 ورود به اتاق</button>
 
-    <div class="actions">
-      <button class="btn btn-primary" id="newRoundBtn" type="button">🔄 دور جدید</button>
-      <button class="btn btn-danger" id="leaveBtn" type="button">🚪 خروج</button>
+      <div id="waiting" class="waiting hidden">
+        <div class="loader"></div>
+        <p class="center mb" style="font-size:0.9rem;">منتظر دوستت هستم...</p>
+        <div class="code-display" id="roomCodeDisplay">------</div>
+        <p class="center" style="font-size:0.75rem;opacity:0.6;margin-bottom:10px;">لینک رو بفرست یا کد رو بگو:</p>
+        <input type="text" id="inviteLink" class="input" readonly>
+        <button class="btn btn-cyan" id="shareLinkBtn" type="button">📤 اشتراک‌گذاری لینک</button>
+        <button class="btn btn-secondary" id="copyLinkBtn" type="button">📋 کپی لینک</button>
+        <button class="btn btn-danger" id="cancelWaitBtn" type="button">✖ انصراف</button>
+        <p class="hint" id="copyHint"></p>
+      </div>
+
+      <p class="hint" id="lobbyHint"></p>
+    </div>
+
+    <!-- بازی -->
+    <div id="gameArea" class="hidden">
+      <div class="center">
+        <span class="series-badge" id="seriesBadge">🎯 اولین دور</span>
+      </div>
+      <div class="scoreboard">
+        <div class="score-card x" id="scoreXCard">
+          <div class="label" id="labelX">تو</div>
+          <div class="value" id="scoreX">0</div>
+        </div>
+        <div class="score-card draw">
+          <div class="label">مساوی</div>
+          <div class="value" id="scoreDraw">0</div>
+        </div>
+        <div class="score-card o" id="scoreOCard">
+          <div class="label" id="labelO">دوستت</div>
+          <div class="value" id="scoreO">0</div>
+        </div>
+      </div>
+
+      <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+
+      <div class="status" id="status">در حال اتصال...</div>
+      <div class="board" id="board"></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="newRoundBtn" type="button">🔄 دور جدید</button>
+        <button class="btn btn-danger" id="leaveBtn" type="button">🚪 خروج</button>
+      </div>
     </div>
   </div>
 </div>
@@ -224,9 +561,12 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
 <!-- پاپ‌آپ -->
 <div class="overlay" id="overlay">
   <div class="popup">
-    <h2 id="popupTitle">برنده!</h2>
-    <p id="popupMessage"></p>
-    <button class="btn btn-primary" id="popupBtn" type="button">دور بعدی</button>
+    <div class="popup-content">
+      <div class="big-emoji" id="popupEmoji">🎉</div>
+      <h2 id="popupTitle">برنده!</h2>
+      <p id="popupMessage"></p>
+      <button class="btn btn-primary" id="popupBtn" type="button">دور بعدی</button>
+    </div>
   </div>
 </div>
 
@@ -235,13 +575,17 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
 (function() {
   'use strict';
 
+  // ================== تنظیمات ==================
   const WINNING_COMBOS = [
     [0,1,2],[3,4,5],[6,7,8],
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
-  const ROOM_PREFIX = 'dooz9k7'; // فقط حروف و عدد، بدون کاراکتر خاص
+  const ROOM_PREFIX = 'doozneon9k7';
+  const TURN_TIME = 20; // ثانیه
+  const WIN_TARGET = 3; // بهترین از ۵ (اول به ۳ برد)
 
+  // ================== State ==================
   let peer = null, conn = null;
   let isHost = false, mySymbol = null;
   let currentPlayer = 'X';
@@ -249,29 +593,161 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
   let gameActive = false, connected = false;
   let scores = { X: 0, O: 0, draw: 0 };
   let roomCode = null;
+  let turnTimer = null, turnTimeLeft = TURN_TIME;
+  let retryCount = 0;
+  const MAX_RETRIES = 4;
 
+  // ================== DOM ==================
   const $ = id => document.getElementById(id);
   const lobby = $('lobby'), waiting = $('waiting'), gameArea = $('gameArea');
   const statusEl = $('status'), boardEl = $('board');
   const overlay = $('overlay'), popupTitle = $('popupTitle');
-  const popupMessage = $('popupMessage');
+  const popupMessage = $('popupMessage'), popupEmoji = $('popupEmoji');
   const copyHint = $('copyHint'), lobbyHint = $('lobbyHint');
   const roomCodeDisplay = $('roomCodeDisplay'), inviteLinkEl = $('inviteLink');
+  const connDot = $('connDot'), connText = $('connText');
+  const timerBar = $('timerBar');
+  const seriesBadge = $('seriesBadge');
 
-  // =============== ابزار ===============
+  // ================== صدا (Web Audio) ==================
+  let audioCtx = null;
+  function initAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function playTone(freq, duration, type) {
+    if (!audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
+    } catch(e){}
+  }
+  const sfx = {
+    move:    () => playTone(600, 0.08, 'triangle'),
+    win:     () => { playTone(523, 0.15); setTimeout(()=>playTone(659, 0.15), 100); setTimeout(()=>playTone(784, 0.3), 200); },
+    lose:    () => { playTone(400, 0.15, 'sawtooth'); setTimeout(()=>playTone(300, 0.3, 'sawtooth'), 150); },
+    draw:    () => { playTone(400, 0.2); setTimeout(()=>playTone(400, 0.2), 250); },
+    connect: () => { playTone(880, 0.1); setTimeout(()=>playTone(1200, 0.15), 100); },
+    click:   () => playTone(500, 0.04, 'square')
+  };
+
+  // ================== ویبره ==================
+  function vibrate(pattern) {
+    if (navigator.vibrate) try { navigator.vibrate(pattern); } catch(e){}
+  }
+
+  // ================== ذرات پس‌زمینه ==================
+  (function initParticles() {
+    const canvas = $('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.8 + 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        color: Math.random() > 0.5 ? '255,0,110' : '0,245,255',
+        a: Math.random() * 0.5 + 0.2
+      });
+    }
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + p.color + ',' + p.a + ')';
+        ctx.fill();
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ================== کانفتی ==================
+  function launchConfetti() {
+    const canvas = $('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const colors = ['#ff006e', '#00f5ff', '#8338ec', '#ffd200', '#00ff9d'];
+    const pieces = [];
+    for (let i = 0; i < 120; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.5,
+        vx: (Math.random() - 0.5) * 4,
+        vy: Math.random() * 3 + 2,
+        size: Math.random() * 6 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.2
+      });
+    }
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+        p.vy += 0.1;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      });
+      frame++;
+      if (frame < 200) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    draw();
+  }
+
+  // ================== ابزار ==================
   function genCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
-  function showHint(el, msg, isError) {
-    el.textContent = msg;
-    el.classList.toggle('error', !!isError);
+  function showHint(el, msg, cls) {
+    el.textContent = msg || '';
+    el.className = 'hint' + (cls ? ' ' + cls : '');
   }
   function getInviteLink() {
     return location.origin + location.pathname + '?r=' + roomCode;
   }
+  function setConnStatus(state, text) {
+    connDot.className = 'conn-dot ' + (state || '');
+    connText.textContent = text;
+  }
+  function updateSeriesBadge() {
+    const w = Math.max(scores.X, scores.O);
+    if (w === 0) seriesBadge.textContent = '🎯 اولین دور';
+    else if (w >= WIN_TARGET - 1) seriesBadge.textContent = '🔥 نقطه سرنوشت! (' + w + '/' + WIN_TARGET + ')';
+    else seriesBadge.textContent = '🎯 بهترین از ' + (WIN_TARGET * 2 - 1) + ' — ' + w + '/' + WIN_TARGET;
+  }
 
-  // =============== ساخت اتاق ===============
+  // ================== ساخت اتاق ==================
   function createRoom() {
+    initAudio();
+    sfx.click();
     if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
 
     roomCode = genCode();
@@ -279,28 +755,32 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     mySymbol = 'X';
 
     showHint(lobbyHint, 'در حال ساخت اتاق...');
+    setConnStatus('connecting', 'در حال اتصال به سرور...');
 
     peer = new Peer(ROOM_PREFIX + roomCode, {
       debug: 1,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
         ]
       }
     });
 
-    // timeout اگه سرور جواب نداد
     const timeout = setTimeout(() => {
       if (!peer || !peer.open) {
-        showHint(lobbyHint, '❌ اتصال به سرور کند است. اینترنت را چک کن و دوباره تلاش کن.', true);
+        showHint(lobbyHint, '❌ سرور پاسخ نداد. دوباره بزن.', 'error');
+        setConnStatus('', 'خطا');
         destroyPeer();
+        resetToLobby();
       }
     }, 15000);
 
     peer.on('open', () => {
       clearTimeout(timeout);
       showHint(lobbyHint, '');
+      setConnStatus('connecting', 'منتظر دوستت...');
       window.history.replaceState(null, '', '?r=' + roomCode);
       roomCodeDisplay.textContent = roomCode;
       inviteLinkEl.value = getInviteLink();
@@ -319,76 +799,126 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     peer.on('error', (err) => {
       clearTimeout(timeout);
       console.error('Peer error:', err);
-      let msg = 'خطای اتصال. دوباره تلاش کن.';
-      if (err.type === 'unavailable-id') msg = 'این کد گرفته شده. دوباره بزن.';
+      let msg = 'خطای اتصال';
+      if (err.type === 'unavailable-id') msg = 'کد گرفته شده. دوباره بزن.';
       else if (err.type === 'network') msg = 'اینترنت قطع است.';
-      else if (err.type === 'server-error') msg = 'سرور PeerJS پاسخ نداد. کمی بعد امتحان کن.';
-      showHint(lobbyHint, '❌ ' + msg, true);
+      else if (err.type === 'server-error') msg = 'سرور شلوغ است. کمی بعد.';
+      showHint(lobbyHint, '❌ ' + msg, 'error');
+      setConnStatus('', 'خطا');
       destroyPeer();
       resetToLobby();
     });
   }
 
-  // =============== ورود به اتاق ===============
-  function joinRoom(code) {
+  // ================== ورود به اتاق ==================
+  function joinRoom(code, isRetry) {
+    initAudio();
+    if (!isRetry) sfx.click();
+
     code = String(code || '').replace(/\D/g, '');
     if (code.length !== 6) {
-      showHint(lobbyHint, '❌ کد باید ۶ رقم باشه', true);
+      showHint(lobbyHint, '❌ کد باید ۶ رقم باشه', 'error');
       return;
     }
-    if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+    if (peer && !isRetry) { try { peer.destroy(); } catch(e){} peer = null; }
 
     isHost = false;
     mySymbol = 'O';
     roomCode = code;
-    showHint(lobbyHint, 'در حال اتصال...');
+
+    if (!isRetry) {
+      retryCount = 0;
+      showHint(lobbyHint, '🔎 در حال پیدا کردن میزبان...');
+      setConnStatus('connecting', 'اتصال...');
+      lobby.classList.add('hidden');
+      waiting.classList.remove('hidden');
+      roomCodeDisplay.textContent = code;
+      roomCodeDisplay.style.fontSize = '1.6rem';
+    }
+
+    if (isRetry && conn) {
+      // فقط دوباره تلاش کن
+      tryConnect();
+      return;
+    }
 
     peer = new Peer({
       debug: 1,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
         ]
       }
     });
 
-    const timeout = setTimeout(() => {
-      if (!connected) {
-        showHint(lobbyHint, '❌ اتاق پیدا نشد. شاید میزبان آفلاین شده.', true);
-        destroyPeer();
-        resetToLobby();
-      }
-    }, 15000);
-
     peer.on('open', () => {
-      showHint(lobbyHint, 'در حال پیدا کردن میزبان...');
-      conn = peer.connect(ROOM_PREFIX + code, { reliable: true });
-      setupConnection();
+      tryConnect();
     });
 
     peer.on('error', (err) => {
-      clearTimeout(timeout);
       console.error('Peer error:', err);
-      let msg = 'اتصال ناموفق. کد رو چک کن.';
-      if (err.type === 'peer-unavailable') msg = 'اتاقی با این کد پیدا نشد.';
-      else if (err.type === 'network') msg = 'اینترنت قطع است.';
-      showHint(lobbyHint, '❌ ' + msg, true);
-      destroyPeer();
-      resetToLobby();
+      if (err.type === 'peer-unavailable') {
+        handleRetry();
+      } else if (err.type === 'network') {
+        showHint(lobbyHint, '❌ اینترنت قطع است', 'error');
+        setConnStatus('', 'آفلاین');
+        destroyPeer();
+        resetToLobby();
+      } else if (!isRetry) {
+        showHint(lobbyHint, '❌ ' + (err.type || 'خطا'), 'error');
+        setConnStatus('', 'خطا');
+        destroyPeer();
+        resetToLobby();
+      }
     });
   }
 
-  // =============== اتصال ===============
+  function tryConnect() {
+    if (!peer || !peer.open) return;
+    try { if (conn) conn.close(); } catch(e){}
+    conn = peer.connect(ROOM_PREFIX + roomCode, { reliable: true });
+    setupConnection();
+    // timeout
+    setTimeout(() => {
+      if (!connected && retryCount < MAX_RETRIES) {
+        // اگر هنوز وصل نشده، دوباره تلاش کن
+      }
+    }, 5000);
+  }
+
+  function handleRetry() {
+    if (retryCount >= MAX_RETRIES) {
+      showHint(lobbyHint, '❌ اتاقی با این کد پیدا نشد. شاید میزبان آفلاین شده.', 'error');
+      setConnStatus('', 'ناموفق');
+      destroyPeer();
+      resetToLobby();
+      return;
+    }
+    retryCount++;
+    showHint(lobbyHint, '🔄 تلاش ' + retryCount + ' از ' + MAX_RETRIES + '...', '');
+    setTimeout(() => {
+      if (peer && peer.open) tryConnect();
+    }, 2000);
+  }
+
+  // ================== اتصال ==================
   function setupConnection() {
     if (!conn) return;
 
     conn.on('open', () => {
       connected = true;
+      retryCount = 0;
       waiting.classList.add('hidden');
       lobby.classList.add('hidden');
       gameArea.classList.remove('hidden');
       showHint(lobbyHint, '');
+      setConnStatus('connected', '✅ متصل شدی');
+      sfx.connect();
+      vibrate([30, 50, 30]);
+      scores = { X: 0, O: 0, draw: 0 };
+      updateScores();
       startNewRound();
     });
 
@@ -399,16 +929,18 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     conn.on('close', () => {
       connected = false;
       gameActive = false;
+      stopTimer();
+      setConnStatus('', 'قطع شد');
       statusEl.textContent = '❌ دوستت خارج شد';
       setTimeout(() => {
-        if (confirm('دوستت از بازی خارج شد. برگردیم به لابی؟')) resetToLobby();
+        if (confirm('دوستت خارج شد. برگردیم لابی؟')) resetToLobby();
       }, 300);
     });
 
     conn.on('error', (err) => console.error('Conn error:', err));
   }
 
-  // =============== پیام‌ها ===============
+  // ================== پیام‌ها ==================
   function handleMessage(data) {
     if (!data || !data.type) return;
     switch (data.type) {
@@ -418,17 +950,74 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
       case 'new-round':
         startNewRound();
         break;
+      case 'timeout':
+        // حریف تایم‌اوت شد → برد برای من
+        handleOpponentTimeout();
+        break;
     }
   }
 
-  // =============== دور جدید ===============
+  // ================== تایمر نوبت ==================
+  function startTimer() {
+    stopTimer();
+    turnTimeLeft = TURN_TIME;
+    timerBar.style.width = '100%';
+    timerBar.classList.remove('warning');
+    turnTimer = setInterval(() => {
+      turnTimeLeft -= 0.1;
+      const pct = Math.max(0, (turnTimeLeft / TURN_TIME) * 100);
+      timerBar.style.width = pct + '%';
+      if (pct < 30) timerBar.classList.add('warning');
+      if (turnTimeLeft <= 0) {
+        stopTimer();
+        handleTimeout();
+      }
+    }, 100);
+  }
+
+  function stopTimer() {
+    if (turnTimer) clearInterval(turnTimer);
+    turnTimer = null;
+  }
+
+  function handleTimeout() {
+    if (!gameActive) return;
+    // نوبت کی بود؟ اگه نوبت من بود → من باختم (حریف می‌بره)
+    if (currentPlayer === mySymbol) {
+      // من تایم‌اوت شدم → به حریف بگو
+      if (conn && conn.open) conn.send({ type: 'timeout', loser: mySymbol });
+      handleOpponentTimeout(); // حریف به عنوان برنده
+    }
+  }
+
+  function handleOpponentTimeout() {
+    if (!gameActive) return;
+    gameActive = false;
+    stopTimer();
+    const winner = currentPlayer === 'X' ? 'O' : 'X'; // حریف برنده
+    scores[winner]++;
+    updateScores();
+    updateSeriesBadge();
+    if (winner === mySymbol) {
+      sfx.win(); vibrate([50, 100, 50, 100, 50]);
+      launchConfetti();
+      showPopup('⏰ حریف تایم‌اوت شد!', 'خودکار بردی! 😎', 'win');
+    } else {
+      sfx.lose();
+      showPopup('⏰ تایم‌اوت شدی!', 'حریف خودکار برد. سریع‌تر بازی کن!', 'lose');
+    }
+  }
+
+  // ================== دور جدید ==================
   function startNewRound() {
     board = Array(9).fill('');
     currentPlayer = 'X';
     gameActive = true;
     renderBoard();
     updateStatus();
+    updateSeriesBadge();
     hidePopup();
+    if (connected) startTimer();
   }
 
   function renderBoard() {
@@ -444,19 +1033,24 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     updateActiveScoreCard();
   }
 
-  // =============== کلیک روی خانه ===============
+  // ================== کلیک روی خانه ==================
   function handleCellClick(index) {
     if (!gameActive || !connected) return;
     if (board[index] !== '') return;
     if (currentPlayer !== mySymbol) {
       statusEl.textContent = '⏳ صبر کن، نوبت دوستته';
+      boardEl.classList.add('shake');
+      setTimeout(() => boardEl.classList.remove('shake'), 300);
+      vibrate(30);
       return;
     }
+    sfx.move();
+    vibrate(15);
     if (conn && conn.open) conn.send({ type: 'move', index: index, player: mySymbol });
     applyMove(index, mySymbol);
   }
 
-  // =============== اعمال حرکت ===============
+  // ================== اعمال حرکت ==================
   function applyMove(index, player) {
     if (board[index] !== '' || !gameActive) return;
     board[index] = player;
@@ -465,37 +1059,61 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     if (cell) {
       cell.textContent = player;
       cell.classList.add('taken', 'pop', player.toLowerCase());
-      setTimeout(() => cell.classList.remove('pop'), 300);
+      setTimeout(() => cell.classList.remove('pop'), 350);
     }
 
     const winCombo = checkWinner();
     if (winCombo) {
       gameActive = false;
+      stopTimer();
       winCombo.forEach(i => boardEl.children[i] && boardEl.children[i].classList.add('win'));
       scores[player]++;
       updateScores();
+      updateSeriesBadge();
       const iWon = player === mySymbol;
+      const seriesOver = scores[player] >= WIN_TARGET;
+
+      if (iWon) {
+        sfx.win(); vibrate([50, 100, 50, 100, 50]);
+        launchConfetti();
+      } else {
+        sfx.lose(); vibrate([100, 50, 100]);
+      }
+
       setTimeout(() => {
-        showPopup(iWon ? '🎉 بردی!' : '😢 باختی!',
-                  iWon ? 'آفرین! حریفت رو بردی 😎' : 'دفعه بعد جبران کن!');
-      }, 400);
+        if (seriesOver) {
+          showPopup(iWon ? '🏆 قهرمان شدی!' : '😔 حریف قهرمان شد',
+                    iWon ? 'سری رو بردی! ' + scores.X + '-' + scores.O
+                         : 'این سری رو باختی. دفعه بعد!',
+                    iWon ? 'win' : 'lose');
+        } else {
+          showPopup(iWon ? '🎉 بردی!' : '😢 باختی!',
+                    iWon ? 'یک قدم به قهرمانی نزدیک‌تر!'
+                         : 'دفعه بعد جبران کن!',
+                    iWon ? 'win' : 'lose');
+        }
+      }, 500);
       return;
     }
 
     if (board.every(c => c !== '')) {
       gameActive = false;
+      stopTimer();
       scores.draw++;
       updateScores();
-      setTimeout(() => showPopup('🤝 مساوی!', 'هیچ‌کدام نبردند!'), 400);
+      updateSeriesBadge();
+      sfx.draw();
+      setTimeout(() => showPopup('🤝 مساوی!', 'هیچ‌کدام نبردند!', 'draw'), 400);
       return;
     }
 
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     updateStatus();
     updateActiveScoreCard();
+    if (connected) startTimer();
   }
 
-  // =============== کمک‌ها ===============
+  // ================== کمک‌ها ==================
   function checkWinner() {
     for (const [a,b,c] of WINNING_COMBOS) {
       if (board[a] && board[a] === board[b] && board[a] === board[c]) return [a,b,c];
@@ -504,11 +1122,11 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
   }
 
   function updateStatus() {
-    if (!connected) { statusEl.textContent = 'در حال اتصال...'; return; }
+    if (!connected) { statusEl.textContent = 'در حال اتصال...'; statusEl.style.color = '#b0b0b0'; return; }
     if (!gameActive) return;
     if (currentPlayer === mySymbol) {
       statusEl.textContent = '🟢 نوبت خودته';
-      statusEl.style.color = '#4ecdc4';
+      statusEl.style.color = '#00ff9d';
     } else {
       statusEl.textContent = '⏳ نوبت دوستته';
       statusEl.style.color = '#ffd200';
@@ -523,31 +1141,33 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
 
   function updateActiveScoreCard() {
     const xIsMe = mySymbol === 'X';
-    $('labelX').textContent = xIsMe ? 'تو (X)' : 'دوستت (X)';
-    $('labelO').textContent = xIsMe ? 'دوستت (O)' : 'تو (O)';
+    $('labelX').textContent = xIsMe ? 'تو' : 'دوستت';
+    $('labelO').textContent = xIsMe ? 'دوستت' : 'تو';
     $('scoreXCard').classList.toggle('active', currentPlayer === 'X');
     $('scoreOCard').classList.toggle('active', currentPlayer === 'O');
   }
 
-  function showPopup(t, m) {
+  function showPopup(t, m, type) {
     popupTitle.textContent = t;
+    popupTitle.className = type || '';
     popupMessage.textContent = m;
+    popupEmoji.textContent = type === 'win' ? '🏆' : type === 'lose' ? '😢' : '🤝';
     overlay.classList.add('show');
   }
   function hidePopup() { overlay.classList.remove('show'); }
 
-  // =============== پاک‌سازی ===============
+  // ================== پاک‌سازی ==================
   function destroyPeer() {
     if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
     conn = null;
     connected = false;
+    stopTimer();
   }
 
   function resetToLobby() {
     destroyPeer();
-    roomCode = null;
-    isHost = false;
-    mySymbol = null;
+    roomCode = null; isHost = false; mySymbol = null;
+    retryCount = 0;
     window.history.replaceState(null, '', location.pathname);
     waiting.classList.add('hidden');
     lobby.classList.remove('hidden');
@@ -558,33 +1178,35 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     $('joinCode').value = '';
     inviteLinkEl.value = '';
     roomCodeDisplay.textContent = '------';
+    roomCodeDisplay.style.fontSize = '';
+    setConnStatus('', 'آفلاین');
     showHint(lobbyHint, '');
     showHint(copyHint, '');
   }
 
-  // =============== اشتراک‌گذاری / کپی ===============
+  // ================== اشتراک / کپی ==================
   async function shareLink() {
+    sfx.click();
     const url = getInviteLink();
-    const text = 'بیا دوز بازی کنیم! کد اتاق: ' + roomCode;
+    const text = '⚡ بیا دوز نئون بازی کنیم!\nکد اتاق: ' + roomCode;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'دوز آنلاین', text: text, url: url });
-        showHint(copyHint, '✅ ارسال شد');
+        await navigator.share({ title: 'دوز نئون', text: text, url: url });
+        showHint(copyHint, '✅ ارسال شد', 'success');
         return;
       } catch (e) {
         if (e && e.name === 'AbortError') return;
-        // در غیر این صورت بیفت روی کپی
       }
     }
     copyLink();
   }
 
   function copyLink() {
+    sfx.click();
     const url = getInviteLink();
-    // روش ۱: Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(url).then(() => {
-        showHint(copyHint, '✅ لینک کپی شد!');
+        showHint(copyHint, '✅ لینک کپی شد!', 'success');
         setTimeout(() => showHint(copyHint, ''), 3000);
       }).catch(() => fallbackCopy(url));
     } else {
@@ -593,7 +1215,6 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
   }
 
   function fallbackCopy(url) {
-    // روش ۲: انتخاب متن داخل input
     inviteLinkEl.value = url;
     inviteLinkEl.removeAttribute('readonly');
     inviteLinkEl.select();
@@ -602,14 +1223,14 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
     try { ok = document.execCommand('copy'); } catch(e) {}
     inviteLinkEl.setAttribute('readonly', 'readonly');
     if (ok) {
-      showHint(copyHint, '✅ لینک کپی شد!');
+      showHint(copyHint, '✅ کپی شد!', 'success');
       setTimeout(() => showHint(copyHint, ''), 3000);
     } else {
-      showHint(copyHint, '⚠️ لینک رو دستی نگه‌دار و کپی کن (روی کادر بالا نگه‌دار)', true);
+      showHint(copyHint, '⚠️ روی کادر بالا نگه‌دار و کپی کن', 'error');
     }
   }
 
-  // =============== رویدادها ===============
+  // ================== رویدادها ==================
   $('createRoomBtn').addEventListener('click', createRoom);
 
   $('joinRoomBtn').addEventListener('click', () => {
@@ -632,41 +1253,62 @@ body.light .cell { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0
 
   $('newRoundBtn').addEventListener('click', () => {
     if (!connected) return;
+    sfx.click();
     if (conn && conn.open) conn.send({ type: 'new-round' });
     startNewRound();
   });
 
   $('popupBtn').addEventListener('click', () => {
+    sfx.click();
     if (!connected) { resetToLobby(); return; }
     if (conn && conn.open) conn.send({ type: 'new-round' });
     startNewRound();
   });
 
   $('leaveBtn').addEventListener('click', () => {
-    if (confirm('مطمئنی؟')) resetToLobby();
+    if (confirm('مطمئنی خارج شی؟')) resetToLobby();
   });
 
   $('themeToggle').addEventListener('click', () => {
-    document.body.classList.toggle('light');
-    const isLight = document.body.classList.contains('light');
-    $('themeToggle').textContent = isLight ? '☀️' : '🌙';
-    try { localStorage.setItem('dooz-theme', isLight ? 'light' : 'dark'); } catch(e){}
+    // چرخش تم‌ها: نئون پیش‌فرض → صورتی → سبز → آبی
+    const themes = ['', 'theme-pink', 'theme-green', 'theme-blue'];
+    const current = themes.findIndex(t => t && document.body.classList.contains(t));
+    themes.forEach(t => t && document.body.classList.remove(t));
+    const next = (current + 1) % themes.length;
+    if (themes[next]) document.body.classList.add(themes[next]);
+    try { localStorage.setItem('dooz-theme', themes[next]); } catch(e){}
+    playTone(700, 0.1, 'triangle');
   });
 
-  // =============== راه‌اندازی ===============
+  // ================== راه‌اندازی ==================
   try {
-    if (localStorage.getItem('dooz-theme') === 'light') {
-      document.body.classList.add('light');
-      $('themeToggle').textContent = '☀️';
-    }
+    const savedTheme = localStorage.getItem('dooz-theme');
+    if (savedTheme) document.body.classList.add(savedTheme);
   } catch(e) {}
 
+  // پارس کردن لینک دعوت — با دقت بیشتر
   const params = new URLSearchParams(location.search);
   const r = (params.get('r') || params.get('room') || '').replace(/\D/g, '').slice(0, 6);
+
   if (r.length === 6) {
     $('joinCode').value = r;
-    setTimeout(() => joinRoom(r), 400);
+    // نمایش سریع حالت لابی-در-حال-اتصال
+    showHint(lobbyHint, '🔗 لینک دعوت شناسایی شد! در حال اتصال...', '');
+    // تاخیر کوتاه برای اطمینان از لود کامل PeerJS
+    setTimeout(() => {
+      if (typeof Peer === 'undefined') {
+        showHint(lobbyHint, '❌ کتابخانه اتصال لود نشد. صفحه رو رفرش کن.', 'error');
+        return;
+      }
+      joinRoom(r);
+    }, 600);
   }
+
+  // قطع تمیز
+  window.addEventListener('beforeunload', () => {
+    destroyPeer();
+  });
+
 })();
 </script>
 </body>
